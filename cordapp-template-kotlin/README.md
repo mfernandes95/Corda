@@ -140,3 +140,25 @@ You should extend this template as follows:
 
 For a guided example of how to extend this template, see the Hello, World! tutorial 
 [here](https://docs.corda.net/hello-world-introduction.html).
+
+
+Building your own CorDapp
+
+https://docs.corda.net/quickstart-build.html
+
+1. Open a terminal and navigate to the root directory of the project.
+
+2. To deploy the nodes on Windows run the following command: gradlew clean deployNodes
+To deploy the nodes on Mac or Linux run the following command: ./gradlew clean deployNodes
+
+3. To start the nodes on Windows run the following command: build\nodes\runnodes
+To start the nodes on Mac/Linux run the following command: build/nodes/runnodes
+
+4.To run flows in your CorDapp, enter the following flow command from any non-notary terminal window:
+
+Kotlin
+``flow start CarIssueInitiator owningBank: BankofAmerica, holdingDealer: Dealership, manufacturer: Manufacturer, vin: "abc", licensePlateNumber: "abc1234", make: "Honda", model: "Civic", dealershipLocation: "NYC"``
+
+5. To check that the state was correctly issued, query the node using the following command:
+
+run vaultQuery contractStateType: com.template.states.CarState

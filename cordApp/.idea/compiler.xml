@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel>
+      <module name="cordApp.clients.main" target="1.8" />
+      <module name="cordApp.clients.test" target="1.8" />
+      <module name="cordApp.contracts.main" target="1.8" />
+      <module name="cordApp.contracts.test" target="1.8" />
+      <module name="cordApp.main" target="1.8" />
+      <module name="cordApp.test" target="1.8" />
+      <module name="cordApp.workflows.main" target="1.8" />
+      <module name="cordApp.workflows.test" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
