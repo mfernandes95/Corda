@@ -1,8 +1,8 @@
 package com.template.flows
 
 import co.paralleluniverse.fibers.Suspendable
-import com.template.contracts.IOUContract
-import com.template.states.IOUState
+import com.template.contracts.ReservationProposalContract
+import com.template.states.ReservationProposalState
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.requireThat
 import net.corda.core.flows.*
@@ -17,7 +17,7 @@ import net.corda.core.utilities.ProgressTracker
 // *********
 @InitiatingFlow
 @StartableByRPC
-class IOUFlow(val iouValue: Int,
+class ReservationProposalFlow(val iouValue: Int,
               val otherParty: Party) : FlowLogic<Unit>() {
 
     /** The progress tracker provides checkpoints indicating the progress of the flow to observers. */
@@ -30,12 +30,12 @@ class IOUFlow(val iouValue: Int,
         val notary = serviceHub.networkMapCache.notaryIdentities[0]
 
 // We create the transaction components.
-        val outputState = IOUState(iouValue, ourIdentity, otherParty)
-        val command = Command(IOUContract.Create(), listOf(ourIdentity.owningKey, otherParty.owningKey))
+        val outputState = ReservationProposalState(iouValue, ourIdentity, otherParty)
+        val command = Command(ReservationProposalContract.Create(), listOf(ourIdentity.owningKey, otherParty.owningKey))
 
 // We create a transaction builder and add the components.
         val txBuilder = TransactionBuilder(notary = notary)
-                .addOutputState(outputState, IOUContract.ID)
+                .addOutputState(outputState, ReservationProposalContract.ID)
                 .addCommand(command)
 
 // Verifying the transaction.
@@ -57,16 +57,16 @@ class IOUFlow(val iouValue: Int,
 
 
 
-@InitiatedBy(IOUFlow::class)
-class IOUFlowResponder(private val otherPartySession: FlowSession) : FlowLogic<Unit>() {
+@InitiatedBy(ReservationProposalFlow::class)
+class ReservationProposalFlowResponder(private val otherPartySession: FlowSession) : FlowLogic<Unit>() {
     @Suspendable
     override fun call() {
         val signTransactionFlow = object : SignTransactionFlow(otherPartySession) {
             override fun checkTransaction(stx: SignedTransaction) = requireThat {
                 val output = stx.tx.outputs.single().data
-                "This must be an IOU transaction." using (output is IOUState)
-                val iou = output as IOUState
-                "The IOU's value can't be too high." using (iou.value < 100)
+                "This must be an IOU transaction." using (output is ReservationProposalState)
+                val iou = output as ReservationProposalState
+                "The IOU's value can't be too high." using (iou.valuePerHour < 100)
             }
         }
         val expectedTxId = subFlow(signTransactionFlow).id

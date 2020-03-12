@@ -1,6 +1,6 @@
 package com.template.contracts
 
-import com.template.states.IOUState
+import com.template.states.ReservationProposalState
 import net.corda.core.contracts.CommandData
 import net.corda.core.contracts.Contract
 import net.corda.core.transactions.LedgerTransaction
@@ -10,11 +10,11 @@ import net.corda.core.contracts.*
 // ************
 // * Contract *
 // ************
-class IOUContract : Contract {
+class ReservationProposalContract : Contract {
     companion object {
         // Used to identify our contract when building a transaction.
 //        const val ID = "com.template.contracts.IOUContract"
-        val ID = IOUContract::class.qualifiedName!!
+        val ID = ReservationProposalContract::class.qualifiedName!!
     }
 
     // Our Create command.
@@ -29,12 +29,12 @@ class IOUContract : Contract {
             "There should be one output state of type IOUState." using (tx.outputs.size == 1)
 
             // IOU-specific constraints.
-            val output = tx.outputsOfType<IOUState>().single()
-            "The IOU's value must be non-negative." using (output.value > 0)
-            "The lender and the borrower cannot be the same entity." using (output.lender != output.borrower)
+            val output = tx.outputsOfType<ReservationProposalState>().single()
+            "The IOU's value must be non-negative." using (output.valuePerHour > 0)
+            "The lender and the borrower cannot be the same entity." using (output.vendor != output.buyer)
 
             // Constraints on the signers.
-            val expectedSigners = listOf(output.borrower.owningKey, output.lender.owningKey)
+            val expectedSigners = listOf(output.buyer.owningKey, output.vendor.owningKey)
             "There must be two signers." using (command.signers.toSet().size == 2)
             "The borrower and lender must be signers." using (command.signers.containsAll(expectedSigners))
         }
