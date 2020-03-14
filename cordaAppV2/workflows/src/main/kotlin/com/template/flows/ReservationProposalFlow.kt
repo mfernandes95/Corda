@@ -4,12 +4,15 @@ import co.paralleluniverse.fibers.Suspendable
 import com.template.contracts.ReservationProposalContract
 import com.template.states.ReservationProposalState
 import net.corda.core.contracts.Command
+import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.contracts.requireThat
 import net.corda.core.flows.*
 import net.corda.core.identity.Party
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 // *********
@@ -17,8 +20,14 @@ import net.corda.core.utilities.ProgressTracker
 // *********
 @InitiatingFlow
 @StartableByRPC
-class ReservationProposalFlow(val iouValue: Int,
-              val otherParty: Party) : FlowLogic<Unit>() {
+class ReservationProposalFlow(val valuePerHour: Double,
+                              val volume: Int,
+                              val dateInit: Date,
+                              val dateFinish: Date,
+                              val energyType: String,
+                              val deliveryPoint: String,
+                              val vendorOperator: String,
+                              val otherParty: Party) : FlowLogic<Unit>() {
 
     /** The progress tracker provides checkpoints indicating the progress of the flow to observers. */
     override val progressTracker = ProgressTracker()
@@ -29,8 +38,33 @@ class ReservationProposalFlow(val iouValue: Int,
         // We retrieve the notary identity from the network map.
         val notary = serviceHub.networkMapCache.notaryIdentities[0]
 
+        //Timestamps
+//        val timestamp = Date().time
+//        val sdf = SimpleDateFormat("dd/MM/yyyy-HH:mm:ss")
+//        var timestamp = sdf.format(timestamp)
+
+        val id: UniqueIdentifier = UniqueIdentifier()
+        val value: Double = valuePerHour * volume
+        val createdAt: Date = Date()
+        val status: String = "pendingActive"
+        val vendorSignature: Date = Date()
+
 // We create the transaction components.
-        val outputState = ReservationProposalState(iouValue, ourIdentity, otherParty)
+        val outputState = ReservationProposalState(
+                                                id,
+                                                valuePerHour,
+                                                volume,
+                                                value,
+                                                dateInit,
+                                                dateFinish,
+                                                energyType,
+                                                deliveryPoint,
+                                                vendorOperator,
+                                                createdAt,
+                                                status,
+                                                vendorSignature,
+                                                ourIdentity,
+                                                otherParty)
         val command = Command(ReservationProposalContract.Create(), listOf(ourIdentity.owningKey, otherParty.owningKey))
 
 // We create a transaction builder and add the components.
@@ -64,9 +98,9 @@ class ReservationProposalFlowResponder(private val otherPartySession: FlowSessio
         val signTransactionFlow = object : SignTransactionFlow(otherPartySession) {
             override fun checkTransaction(stx: SignedTransaction) = requireThat {
                 val output = stx.tx.outputs.single().data
-                "This must be an IOU transaction." using (output is ReservationProposalState)
-                val iou = output as ReservationProposalState
-                "The IOU's value can't be too high." using (iou.valuePerHour < 100)
+                "This must be an ReservatonProposal transaction." using (output is ReservationProposalState)
+//                val iou = output as ReservationProposalState
+//                "The IOU's value can't be too high." using (iou.valuePerHour < 100)
             }
         }
         val expectedTxId = subFlow(signTransactionFlow).id

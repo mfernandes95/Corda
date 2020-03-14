@@ -41,7 +41,7 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
         }
     }
     node {
-        name "O=PartyA,L=Campinas,C=BR"
+        name "O=CPFL,L=Campinas,C=BR"
         p2pAddress "localhost:11002"
         rpcSettings {
             address("localhost:10002")
@@ -50,7 +50,7 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
         rpcUsers = [[ user: "user1", "password": "test", "permissions": ["ALL"]]]
     }
     node {
-        name "O=PartyB,L=Campinas,C=BR"
+        name "O=COMERC,L=Minas Gerais,C=BR"
         p2pAddress "localhost:11003"
         rpcSettings {
             address("localhost:10003")

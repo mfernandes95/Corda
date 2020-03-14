@@ -25,13 +25,16 @@ class ReservationProposalContract : Contract {
 
         requireThat {
             // Constraints on the shape of the transaction.
-            "No inputs should be consumed when issuing an IOU." using (tx.inputs.isEmpty())
-            "There should be one output state of type IOUState." using (tx.outputs.size == 1)
+            "No inputs should be consumed when issuing an ReservationProposal." using (tx.inputs.isEmpty())
+            "There should be one output state of type ReservationProposalState." using (tx.outputs.size == 1)
 
             // IOU-specific constraints.
             val output = tx.outputsOfType<ReservationProposalState>().single()
-            "The IOU's value must be non-negative." using (output.valuePerHour > 0)
+            "The valuePerHour value must be non-negative." using (output.valuePerHour > 0)
+            "The volume value must be non-negative." using (output.volume > 0)
             "The lender and the borrower cannot be the same entity." using (output.vendor != output.buyer)
+            "The dateInit cannot mayor dateFinish." using (output.dateInit < output.dateFinish)
+
 
             // Constraints on the signers.
             val expectedSigners = listOf(output.buyer.owningKey, output.vendor.owningKey)
